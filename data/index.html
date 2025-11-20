@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medication Notifier</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            color: #555;
+            margin-top: 40px;
+        }
+        button {
+            font-size: 18px;
+            padding: 15px 30px;
+            margin: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            min-width: 200px;
+        }
+        .state-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+        .state-btn:hover {
+            background-color: #0b7dda;
+        }
+        .off-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        .off-btn:hover {
+            background-color: #da190b;
+        }
+        .hatch-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .hatch-btn:hover {
+            background-color: #45a049;
+        }
+        .phase1-btn {
+            background-color: #FF9800;
+            color: white;
+        }
+        .phase1-btn:hover {
+            background-color: #e68900;
+        }
+        .phase2-btn {
+            background-color: #FF5722;
+            color: white;
+        }
+        .phase2-btn:hover {
+            background-color: #e64a19;
+        }
+        .phase3-btn {
+            background-color: #E91E63;
+            color: white;
+        }
+        .phase3-btn:hover {
+            background-color: #c2185b;
+        }
+        .phase4-btn {
+            background-color: #9C27B0;
+            color: white;
+        }
+        .phase4-btn:hover {
+            background-color: #7b1fa2;
+        }
+        #status {
+            margin-top: 30px;
+            font-size: 18px;
+            color: #555;
+            font-weight: bold;
+            padding: 15px;
+            background-color: white;
+            border-radius: 10px;
+            display: inline-block;
+            min-width: 300px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .input-data {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            min-width: 300px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .input-label {
+            font-weight: bold;
+            color: #333;
+        }
+        .input-value {
+            color: #555;
+        }
+        .indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+        .indicator-on {
+            background-color: #4CAF50;
+        }
+        .indicator-off {
+            background-color: #f44336;
+        }
+    </style>
+    <script>
+        function setState(state) {
+            fetch('/state/' + state)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('status').textContent = data;
+                })
+                .catch(error => {
+                    document.getElementById('status').textContent = 'Error: ' + error;
+                });
+        }
+        
+        function updateInputData() {
+            fetch('/input')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('hatch-value').textContent = data.isHatchOpen ? 'Open' : 'Closed';
+                    document.getElementById('hatch-indicator').className = 'indicator ' + (data.isHatchOpen ? 'indicator-on' : 'indicator-off');
+                    
+                    document.getElementById('button-value').textContent = data.isUserSwitchPressed ? 'Pressed' : 'Released';
+                    document.getElementById('button-indicator').className = 'indicator ' + (data.isUserSwitchPressed ? 'indicator-on' : 'indicator-off');
+                    
+                    document.getElementById('battery-value').textContent = data.batteryVoltage.toFixed(2) + ' V';
+                })
+                .catch(error => {
+                    console.error('Error fetching input data:', error);
+                });
+        }
+        
+        // Update input data every 500ms
+        setInterval(updateInputData, 500);
+        
+        // Initial update
+        window.onload = updateInputData;
+    </script>
+</head>
+<body>
+    <h1>Medication Notifier Control</h1>
+    <h2>Output State Selection</h2>
+    <div class="container">
+        <button class="off-btn" onclick="setState('off')">OFF</button>
+        <button class="state-btn" onclick="setState('on')">ON</button>
+        <button class="hatch-btn" onclick="setState('hatch')">HATCH OPEN</button>
+        <button class="phase1-btn" onclick="setState('phase1')">Phase 1 (Buzz: 10s)</button>
+        <button class="phase2-btn" onclick="setState('phase2')">Phase 2 (Buzz: 5s)</button>
+        <button class="phase3-btn" onclick="setState('phase3')">Phase 3 (Buzz: 2s + Beep: 4s)</button>
+        <button class="phase4-btn" onclick="setState('phase4')">Phase 4 (Buzz: 0.5s + Beep: 1s)</button>
+    </div>
+    <div id="status">Select a state above</div>
+    
+    <h2>Input Data</h2>
+    <div class="input-data">
+        <div class="input-row">
+            <span class="input-label">Hatch Status:</span>
+            <span>
+                <span id="hatch-value" class="input-value">-</span>
+                <span id="hatch-indicator" class="indicator indicator-off"></span>
+            </span>
+        </div>
+        <div class="input-row">
+            <span class="input-label">User Button:</span>
+            <span>
+                <span id="button-value" class="input-value">-</span>
+                <span id="button-indicator" class="indicator indicator-off"></span>
+            </span>
+        </div>
+        <div class="input-row">
+            <span class="input-label">Battery Voltage:</span>
+            <span id="battery-value" class="input-value">- V</span>
+        </div>
+    </div>
+</body>
+</html>
