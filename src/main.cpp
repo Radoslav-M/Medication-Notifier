@@ -17,9 +17,6 @@ void setup() {
         delay(100);
         printf("\n\nMedication Notifier Starting...\n");
 
-    // Start the server
-        server.begin();
-
     // Initialize output module
         output.begin();
 
@@ -28,6 +25,9 @@ void setup() {
 
     // Initialize sleep system
         sleepSystem.begin();
+
+    // Start the server
+        server.begin();
 
     // Finnish setup
         printf("Setup complete.\n");

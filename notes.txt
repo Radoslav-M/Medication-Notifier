@@ -1,0 +1,2 @@
+add low battery warning
+add time desynched warning
